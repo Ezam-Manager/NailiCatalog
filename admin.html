@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Upload Produk</title>
+</head>
+<body>
+  <h2>Tambah Produk Kain</h2>
+  <input type="text" id="productName" placeholder="Nama Kain"><br>
+  <input type="number" id="productPrice" placeholder="Harga (RM)"><br>
+  <input type="number" id="productStock" placeholder="Stok (meter)"><br>
+  <input type="text" id="productQuality" placeholder="Kualiti Kain (Contoh: Premium Cotton)"><br>
+  <input type="file" id="productImage"><br><br>
+  <button onclick="uploadProduct()">Upload</button>
+
+  <script type="module">
+    import {{ initializeApp }} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import {{ getFirestore, collection, addDoc }} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+    import {{ getStorage, ref, uploadBytes, getDownloadURL }} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
+
+    const firebaseConfig = {{
+      apiKey: "MASUKKAN_API_KEY",
+      authDomain: "MASUKKAN_AUTH_DOMAIN",
+      projectId: "MASUKKAN_PROJECT_ID",
+      storageBucket: "MASUKKAN_STORAGE_BUCKET",
+      messagingSenderId: "MASUKKAN_SENDER_ID",
+      appId: "MASUKKAN_APP_ID"
+    }};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    async function uploadProduct() {{
+      const name = document.getElementById("productName").value;
+      const price = parseFloat(document.getElementById("productPrice").value);
+      const stock = parseInt(document.getElementById("productStock").value);
+      const quality = document.getElementById("productQuality").value;
+      const file = document.getElementById("productImage").files[0];
+
+      const storageRef = ref(storage, 'products/' + file.name);
+      await uploadBytes(storageRef, file);
+      const imageUrl = await getDownloadURL(storageRef);
+
+      await addDoc(collection(db, "products"), {{
+        name,
+        price,
+        stock,
+        quality,
+        imageUrl
+      }});
+
+      alert("✅ Produk berjaya dimuat naik!");
+    }}
+  </script>
+</body>
+</html>
